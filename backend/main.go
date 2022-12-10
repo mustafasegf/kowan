@@ -46,10 +46,12 @@ func main() {
 		log.Fatal("cannot migrate db: ", err)
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr: config.RedisURL,
-		DB:   0,
-	})
+	opt, err := redis.ParseURL(config.RedisURL)
+	if err != nil {
+		log.Fatal("cannot parse redis url: ", err)
+	}
+
+	rdb := redis.NewClient(opt)
 
 	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		log.Fatal("cannot ping redis: ", err)
