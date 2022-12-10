@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -25,6 +26,9 @@ func LoadConfig() (config Config, err error) {
 	}
 	if config.RedisURL == "" {
 		return config, errors.New("REDIS_URL is not set")
+	}
+	if strings.HasPrefix(config.RedisURL, "redis://") {
+		config.RedisURL = strings.Replace(config.RedisURL, "redis://", "", 1)
 	}
 
 	return
