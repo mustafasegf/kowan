@@ -1,0 +1,50 @@
+version: "3.8"
+services:
+  db:
+    container_name: shortener-db
+    image: postgres:13.3-alpine
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - shortener
+
+  redis:
+    container_name: shortener-redis
+    image: redis:6.2.4-alpine
+    # command: redis-server
+    restart: always
+    # environment:
+    #   - PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - shortener
+
+  server:
+    container_name: server-go-shortener
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    networks:
+      - shortener
+    command: [ "/app/main" ]
+
+volumes:
+  db-data:
+    driver: local
+
+networks:
+  shortener:
+    driver: bridge
