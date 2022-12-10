@@ -1,7 +1,8 @@
 package util
 
 import (
-	"github.com/spf13/viper"
+	"errors"
+	"os"
 )
 
 type Config struct {
@@ -11,14 +12,20 @@ type Config struct {
 }
 
 func LoadConfig() (config Config, err error) {
-	viper.AutomaticEnv()
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
+	config = Config{
+		Port:     os.Getenv("PORT"),
+		DBURL:    os.Getenv("DATABASE_URL"),
+		RedisURL: os.Getenv("REDIS_URL"),
 	}
-
-	err = viper.Unmarshal(&config)
+	if config.Port == "" {
+		return config, errors.New("PORT is not set")
+	}
+	if config.DBURL == "" {
+		return config, errors.New("DATABASE_URL is not set")
+	}
+	if config.RedisURL == "" {
+		return config, errors.New("REDIS_URL is not set")
+	}
 
 	return
 }
